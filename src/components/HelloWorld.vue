@@ -7,13 +7,18 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { lightMachine } from "../models/lightMachine";
+import { toDirectedGraph } from "@xstate/graph";
+import { StateNode } from "xstate";
 
 export default defineComponent({
   name: "HelloWorld",
   data() {
     return {
-      machine: lightMachine,
+      machine: {},
     };
+  },
+  created() {
+    this.machine = toDirectedGraph(lightMachine as StateNode);
   },
   props: {
     msg: String,

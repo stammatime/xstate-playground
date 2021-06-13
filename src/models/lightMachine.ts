@@ -1,17 +1,15 @@
-import { createMachine } from "xstate";
+import { MachineConfig, MachineOptions, Machine } from "xstate";
 
 // The hierarchical (recursive) schema for the states
 interface LightStateSchema {
-  duration: number;
-  type: string;
   states: {
-    green: unknown;
-    yellow: unknown;
+    green: Record<string, unknown>;
+    yellow: Record<string, unknown>;
     red: {
       states: {
-        walk: unknown;
-        wait: unknown;
-        stop: unknown;
+        walk: Record<string, unknown>;
+        wait: Record<string, unknown>;
+        stop: Record<string, unknown>;
       };
     };
   };
@@ -19,25 +17,20 @@ interface LightStateSchema {
 
 // The events that the machine handles
 type LightEvent =
-  | { type: "TIMER"; value: string; context: LightContext }
-  | { type: "POWER_OUTAGE"; value: string; context: LightContext }
-  | {
-      type: "PED_COUNTDOWN";
-      value: string;
-      context: LightContext;
-      duration: number;
-    };
+  | { type: "TIMER" }
+  | { type: "POWER_OUTAGE" }
+  | { type: "PED_COUNTDOWN"; duration: number };
 
 // The context (extended state) of the machine
 interface LightContext {
   elapsed: number;
 }
 
-export const lightMachine = createMachine<
+const lightMachineConfig: MachineConfig<
   LightContext,
   LightStateSchema,
   LightEvent
->({
+> = {
   key: "light",
   initial: "green",
   context: { elapsed: 0 },
@@ -85,4 +78,15 @@ export const lightMachine = createMachine<
       },
     },
   },
-});
+};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lightMachineOptions: Partial<MachineOptions<LightContext, any>> = {
+  // services: {},
+  // actions: {},
+  // guards: {}
+};
+
+export const lightMachine = Machine<LightContext, LightStateSchema, LightEvent>(
+  lightMachineConfig,
+  lightMachineOptions
+);
